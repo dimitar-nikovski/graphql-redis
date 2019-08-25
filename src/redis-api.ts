@@ -3,7 +3,7 @@ import { InitOptions, TypeCreationRule, RedisData, KeyInfo, RedisTypes, IRedisCl
 import redis, { RedisClient } from 'redis';
 import { promisifyAll } from 'bluebird';
 import { zsetToNumberKeyedMap } from './utils';
-import { KEY_DIVIDER } from './constants';
+import { KEY_DIVIDER, PATTERN_VALUE_CHAR } from './constants';
 
 promisifyAll(redis.RedisClient.prototype);
 promisifyAll(redis.Multi.prototype);
@@ -75,12 +75,17 @@ export class RedisAPI {
     data: RedisData = initEmptyData();
     dataModifyer: DataModifyer;
     inferConfig: InferConfig;
-    isKeyPattern: (k: string) => boolean
+    isKeyPattern: (k: string) => boolean;
+    tokenizedPatterns: string[][] = [];
 
     constructor(opts?: InitOptions) {
-        const _opts = {
+        const _opts: InitOptions = {
             ...defaultInitOptions,
-            ...opts
+            ...opts,
+            inferBy: {
+                ...defaultInitOptions.inferBy,
+                ...opts.inferBy
+            }
         }
 
         if (_opts.client) {
@@ -93,6 +98,13 @@ export class RedisAPI {
         addClientEvents(this.client);
         this.dataModifyer = typeToAddDataFnMap(() => this.data);
         this.inferConfig = _opts.inferBy;
+        this.isKeyPattern = _opts.isKeyPattern;
+
+        if (this.inferConfig.keyPatterns) {
+            this.inferConfig.keyPatterns.forEach(p => {
+                this.tokenizedPatterns.push(p.split(KEY_DIVIDER).map(x => x.startsWith('{') ? PATTERN_VALUE_CHAR : x));
+            })
+        }
     }
 
     generalizePattern(key: string) {
@@ -100,7 +112,22 @@ export class RedisAPI {
             // user-defined keys will have {variable} placeholders
             return key.replace(/\{.+?\}/g, '*')
         } else {
-            // const tokens = key.split(KEY_DIVIDER);
+            const tokens = key.split(KEY_DIVIDER);
+            for (let i = 0; i < this.tokenizedPatterns.length; i++) {
+                const arr = this.tokenizedPatterns[i];
+                if (arr.length === tokens.length) {
+                    let match = true;
+                    for (let ai = 0; ai < arr.length; ai++) {
+                        const tp = arr[ai];
+                        if (tp !== tokens[ai] && tp !== PATTERN_VALUE_CHAR) {
+                            match = false;
+                        }
+                    }
+                    if (match) {
+                        return arr.join(':')
+                    }
+                }
+            }
             throw new Error(`Inferring name and variable tokens from a key name is currently not supported, please pass a foo:{x}:bar formatter for ${key}`)
         }
     }
@@ -133,7 +160,9 @@ export class RedisAPI {
                     keys.forEach(k => {
                         // for pattern keys which have val
                         if (this.isKeyPattern(k)) {
-                            if (!patternCache.has(this.generalizePattern(k))) {
+                            const genericPattern = this.generalizePattern(k);
+                            if (!patternCache.has(genericPattern)) {
+                                patternCache.set(genericPattern, 1)
                                 allKeysSet.add({
                                     key: k
                                 })
@@ -203,8 +232,8 @@ export class RedisAPI {
         await this.getDataFromKeys(keysInfo)
     }
 
-    async loadInferenceData() {
-        const keysInfo = await this.collectKeysInfo();
+    async loadInferenceData(inferenceConfig?: InferConfig) {
+        const keysInfo = await this.collectKeysInfo(inferenceConfig);
         await this.getDataFromKeys(keysInfo);
     }
 }

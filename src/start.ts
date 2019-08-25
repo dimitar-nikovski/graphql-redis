@@ -20,7 +20,11 @@ const sampleRule: TypeCreationRule<{ id: number }> = {
 }
 
 async function run() {
-    const redis = new RedisAPI();
+    const redis = new RedisAPI({
+        inferBy: {
+            keyPatterns: ['user:{x}', `team:{x}:members`, `team:{x}`]
+        }
+    });
     await redis.loadInferenceData();
 
     const converter = new TypeCoverter({

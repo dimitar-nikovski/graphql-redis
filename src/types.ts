@@ -24,6 +24,7 @@ export interface IRedisClient extends RedisClient {
 export interface InferConfig {
     scanPatterns?: string[];
     keys?: string[];
+    keyPatterns?: string[];
 }
 
 export interface InitOptions extends ClientOpts {
