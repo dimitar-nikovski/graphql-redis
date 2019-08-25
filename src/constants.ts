@@ -1,0 +1,1 @@
+export const KEY_DIVIDER = process.env.REDIS_KEY_DIVIDER || ':';

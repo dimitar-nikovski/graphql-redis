@@ -1,0 +1,25 @@
+{
+  "name": "redis-graphql",
+  "version": "0.1.0",
+  "main": "lib/index.js",
+  "author": "Dimitar Nikovski",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@types/redis": "^2.8.13",
+    "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
+    "mocha": "^6.2.0",
+    "typescript": "^3.5.3"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.5",
+    "graphql": "^14.5.3",
+    "graphql-tag": "^2.10.1",
+    "redis": "^2.8.0",
+    "redis-mock": "^0.46.0"
+  },
+  "scripts": {
+    "ts": "tsc --skipLibCheck"
+  }
+}
