@@ -30,5 +30,4 @@ async function run() {
     converter.convertFromRedisData(redis.data);
 }
 
-
-// console.log(redis.data);
+run();
