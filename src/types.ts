@@ -14,9 +14,16 @@ export interface IRedisClient extends RedisClient {
     getAsync: (...args: any) => Promise<any>;
 }
 
+// export interface TypeInferOpt {
+//     keyPattern: string;
+//     iferAs: {
+//         name: string;
+//     }
+// }
+
 export interface InferConfig {
     scanPatterns?: string[];
-    keys?: string[]
+    keys?: string[];
 }
 
 export interface InitOptions extends ClientOpts {

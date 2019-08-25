@@ -104,7 +104,7 @@ export class TypeCoverter {
         });
 
         // read all hashes and sets for objects and relations
-        let conversions = [];
+        let conversions: ConversionInfo[] = [];
 
         data.Hashes.forEach((hash) => {
             const convInfo = this.getRulesResult(hash.key, RedisTypes.HASH);
@@ -119,7 +119,5 @@ export class TypeCoverter {
                 conversions.push(convInfo);
             }
         })
-
-        console.log(conversions);
     }
 }

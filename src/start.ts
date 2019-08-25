@@ -21,7 +21,7 @@ const sampleRule: TypeCreationRule<{ id: number }> = {
 
 async function run() {
     const redis = new RedisAPI();
-    await redis.obtainAllData();
+    await redis.loadInferenceData();
 
     const converter = new TypeCoverter({
         rules: [sampleRule]
