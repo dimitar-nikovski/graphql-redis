@@ -100,11 +100,8 @@ export class RedisAPI {
             // user-defined keys will have {variable} placeholders
             return key.replace(/\{.+?\}/g, '*')
         } else {
-            const tokens = key.split(KEY_DIVIDER);
-            switch (tokens.length) {
-                case 2:
-                    return `${tokens[0]}:x`;
-            }
+            // const tokens = key.split(KEY_DIVIDER);
+            throw new Error(`Inferring name and variable tokens from a key name is currently not supported, please pass a foo:{x}:bar formatter for ${key}`)
         }
     }
 

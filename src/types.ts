@@ -29,6 +29,7 @@ export interface InferConfig {
 export interface InitOptions extends ClientOpts {
     client?: IRedisClient;
     inferBy?: InferConfig
+    isKeyPattern?: (key: string) => boolean;
 }
 
 export interface ConversionInfo<TParsed = any, TModel = any> {
@@ -40,7 +41,7 @@ export interface ConversionInfo<TParsed = any, TModel = any> {
 export interface TypeCreationRule<TParsed = any, TModel = any> {
     match: RegExp | string,
     matchTypes?: RedisTypes | RedisTypes[],
-    converterInfo: (key: string, parsed?: TParsed) => ConversionInfo<TParsed, TModel>
+    converterInfo?: (key: string, parsed?: TParsed) => ConversionInfo<TParsed, TModel>
 }
 
 interface RedisEntry {
