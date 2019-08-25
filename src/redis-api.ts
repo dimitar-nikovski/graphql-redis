@@ -1,5 +1,5 @@
 
-import { InitOptions, TypeCreationRule, RedisData, KeyInfo, RedisTypes, IRedisClient } from './types';
+import { InitOptions, TypeCreationRule, RedisData, KeyInfo, RedisTypes, IRedisClient, InferConfig } from './types';
 import redis, { RedisClient, ClientOpts } from 'redis';
 import { promisifyAll } from 'bluebird';
 import { zsetToNumberKeyedMap } from './utils';
@@ -10,9 +10,12 @@ promisifyAll(redis.Multi.prototype);
 const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
 const REDIS_PORT = process.env.REDIS_PORT || '6379';
 
-const defaultInitOptions: ClientOpts = {
+const defaultInitOptions: InitOptions = {
     host: REDIS_HOST,
     port: parseInt(REDIS_PORT),
+    inferBy: {
+        scanPatterns: ['*']
+    },
     auth_pass: process.env.REDIS_PASS,
     db: 0
 }
@@ -69,6 +72,7 @@ export class RedisAPI {
     client: IRedisClient
     data: RedisData = initEmptyData();
     dataModifyer: DataModifyer;
+    inferConfig: InferConfig;
 
     constructor(opts?: InitOptions) {
         const _opts = {
@@ -85,24 +89,38 @@ export class RedisAPI {
 
         addClientEvents(this.client);
         this.dataModifyer = typeToAddDataFnMap(() => this.data);
+        this.inferConfig = _opts.inferBy;
     }
 
     async collectKeysInfo() {
-        const scan = idx => this.client.scanAsync(idx);
 
         let idx = '0';
-        let keys = [];
-        let allKeys: KeyInfo[] = [];
+        let allKeys: KeyInfo[];
+        let allKeysSet = new Set<KeyInfo>();
 
-        while ([idx, keys] = await scan(idx)) {
-            allKeys.push(...keys.map(k => ({
-                key: k
-            })));
+        if (this.inferConfig.scanPatterns) {
+            let keys = [];
+            const scan = idx => this.client.scanAsync(idx);
 
-            if (idx === '0') {
-                break;
+            while ([idx, keys] = await scan(idx)) {
+                keys.forEach(k => (allKeysSet.add({
+                    key: k
+                })))
+
+                if (idx === '0') {
+                    break;
+                }
             }
         }
+
+        if (this.inferConfig.keys) {
+            this.inferConfig.keys.forEach(k => (allKeysSet.add({
+                key: k
+            })))
+        }
+
+        allKeys = Array.from(allKeysSet);
+        allKeysSet = undefined;
 
         for (let i = 0; i < allKeys.length; i++) {
             const k = allKeys[i];

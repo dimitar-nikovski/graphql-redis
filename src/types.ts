@@ -14,8 +14,14 @@ export interface IRedisClient extends RedisClient {
     getAsync: (...args: any) => Promise<any>;
 }
 
+export interface InferConfig {
+    scanPatterns?: string[];
+    keys?: string[]
+}
+
 export interface InitOptions extends ClientOpts {
     client?: IRedisClient;
+    inferBy?: InferConfig
 }
 
 export interface ConversionInfo<TParsed = any, TModel = any> {
