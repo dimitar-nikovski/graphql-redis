@@ -3,7 +3,7 @@
 - [x] connect to a redis instance and read data into an AST structure
 - [x] add a configurable type-converter to use the inferred data and matching rules to create conversion DTOs with names, identifyers and relations
 - [ ] generate a graphql schema with the types inferred from scanning and configurations
-- [ ] resolve Query types
+- [ ] resolve Query types with nested relations via building pipeline commands from parsing a query
 - [ ] add tests as going along
 
 For a basic run through the inital template, there is a `start.ts` script, you can best explore it via debugging in vs code
