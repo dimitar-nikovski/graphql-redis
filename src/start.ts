@@ -4,6 +4,7 @@ loader(path.join(__dirname, '../'));
 import { RedisAPI } from './redis-api';
 import { TypeCreationRule, RedisTypes } from './types';
 import { TypeCoverter } from './type-converter';
+import { RedisSchemaBuilder } from './schema-builder';
 
 const sampleRule: TypeCreationRule<{ id: number }> = {
     match: `team:{id}:members`,
@@ -12,6 +13,9 @@ const sampleRule: TypeCreationRule<{ id: number }> = {
         return {
             id: p.id,
             name: `TeamMembers`,
+            fields: {
+                teamId: p.id
+            },
             childTypes: {
                 User: (p, m) => m.Users.id === p.id
             }
@@ -31,7 +35,8 @@ async function run() {
         rules: [sampleRule]
     });
 
-    converter.convertFromRedisData(redis.data);
+    const conversions = converter.getConversionDTOsFromRedisData(redis.data);
+    RedisSchemaBuilder.buildSchemaFromDTOs(conversions);
 }
 
 run();

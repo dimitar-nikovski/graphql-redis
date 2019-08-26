@@ -36,6 +36,9 @@ export interface InitOptions extends ClientOpts {
 export interface ConversionInfo<TParsed = any, TModel = any> {
     name: string,
     id?: ID,
+    dataSample?: Hash | RedisSet;
+    fields?: any;
+    type?: RedisTypes,
     childTypes?: { [k in string]: (p: TParsed, m: TModel) => boolean }
 }
 

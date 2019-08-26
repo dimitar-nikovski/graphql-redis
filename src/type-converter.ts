@@ -86,16 +86,16 @@ export class TypeCoverter {
             const match = this.matchesRule(key, r.match);
 
             if (match) {
-                result = typeof match === "boolean" ? r.converterInfo(key) : r.converterInfo(key, match)
+                result = typeof match === "boolean" ? r.converterInfo(key) : r.converterInfo(key, match);
                 // don't match more rules
                 break;
             }
         }
 
-        return result;
+        return result ? { ...result, type } : result;
     }
 
-    convertFromRedisData(data: RedisData) {
+    getConversionDTOsFromRedisData(data: RedisData) {
         const model = {};
 
         // add all string keys
@@ -109,6 +109,11 @@ export class TypeCoverter {
         data.Hashes.forEach((hash) => {
             const convInfo = this.getRulesResult(hash.key, RedisTypes.HASH);
             if (convInfo) {
+                if (!convInfo.fields) {
+                    // fields weren't passed as a config option,
+                    // attempt to infer from a data sample
+                    convInfo.dataSample = hash;
+                }
                 conversions.push(convInfo);
             }
         })
@@ -118,6 +123,8 @@ export class TypeCoverter {
             if (convInfo) {
                 conversions.push(convInfo);
             }
-        })
+        });
+
+        return conversions;
     }
 }
