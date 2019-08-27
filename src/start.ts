@@ -6,6 +6,22 @@ import { TypeCreationRule, RedisTypes } from './types';
 import { TypeCoverter } from './type-converter';
 import { RedisSchemaBuilder } from './schema-builder';
 
+const testSchema = `
+    type Team {
+        id: Int!
+        name: String!
+    }
+
+    type User {
+        id: Int!
+        Teams: [Team]
+    }
+
+    Query {
+        Users: [User]
+    }
+`
+
 const sampleRule: TypeCreationRule<{ id: number }> = {
     match: `team:{id}:members`,
     matchTypes: RedisTypes.SET,
@@ -36,7 +52,10 @@ async function run() {
     });
 
     const conversions = converter.getConversionDTOsFromRedisData(redis.data);
-    RedisSchemaBuilder.buildSchemaFromDTOs(conversions);
+    
+    new RedisSchemaBuilder({
+        schema: testSchema
+    }).buildSchemaFromDTOs(conversions);
 }
 
 run();
