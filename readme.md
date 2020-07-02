@@ -1,7 +1,7 @@
 #### At this moment in time, this project is in its inception, for the first working prototype, the following is needed:
 
-- [x] connect to a redis instance and read data into an AST structure
-- [x] add a configurable type-converter to use the inferred data and matching rules to create conversion DTOs with names, identifyers and relations
+- [x] connect to a redis instance and parse data into an AST structure
+- [x] add a configurable type-converter to use the inferred data and matching rules to create conversion DTOs with names, identifiers and relations
 - [ ] generate a graphql schema with the types inferred from scanning and configurations
 - [ ] resolve Query types with nested relations via building pipeline commands from parsing a query
 - [ ] add tests as going along
